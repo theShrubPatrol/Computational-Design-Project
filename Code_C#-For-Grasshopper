@@ -1,0 +1,70 @@
+  private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, ref object A, ref object B, ref object C)
+  {
+    int i;
+    int j;
+    int k;
+
+    //Create list for new connections
+    List<Line> lcon = new List<Line>();
+    //Create list for intersection Points
+    List<Point3d> lpt = new List<Point3d>();
+    //Create list for vector start locations
+    List<Point3d> lstart = new List<Point3d>();
+    //Create list for sifted wallpoints
+    List<Point3d> wallpointsift = new List<Point3d>();
+
+
+    //Create "Sun" vector
+    Point3d wallmidpt = (wall.Vertices[wall.Faces[(wall.Faces.Count / 2) + 20].B]);
+    Vector3d sunray = new Vector3d(sun - wallmidpt);
+
+    //Create list for sunray intersection lines
+    List<Line> lsunray = new List<Line>();
+    //Create loop for sunray intersection test
+    for (i = 0;i < wall.Faces.Count;++i){
+      //Make variable for ALL wallpoints on wall
+      Point3d wallpoint = wall.Vertices[wall.Faces[i].A];
+      Line ln = new Line(wallpoint, sunray);
+
+
+      //Declare faceid
+      int [] faceid;
+      //Evaluate intersctions
+      Point3d [] xp = Rhino.Geometry.Intersect.Intersection.MeshLine(body, ln, out faceid);
+
+      //Sift for intersected points and lines
+      if ( xp.Length == 2){
+        // lsunray.Add(ln);
+        wallpointsift.Add(wallpoint);
+
+        double int1 = ln.ClosestParameter(xp[0]);
+        double int2 = ln.ClosestParameter(xp[1]);
+        if (int1 > int2){
+          lpt.Add(xp[1]);
+        }
+        else if (int1 < int2){
+          lpt.Add(xp[0]);
+        }
+
+        //Create short lines
+        for (j = 0; j < lpt.Count;++j){
+          Line shortline = new Line(wallpointsift[j], lpt[j]);
+          lsunray.Add(shortline);
+        }
+
+
+      }
+      //vector start points
+      //lstart.Add(wall.Vertices[wall.Faces[i].A]);
+
+
+    }
+
+
+
+
+    //Assign to A
+    A = lsunray;
+    B = lpt;
+    C = lstart;
+  }
