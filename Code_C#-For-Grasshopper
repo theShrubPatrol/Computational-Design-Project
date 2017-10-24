@@ -1,7 +1,18 @@
-private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, ref object A, ref object B, ref object C, ref object D, ref object E)
+  private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, ref object A, ref object B, ref object C, ref object D, ref object E, ref object F)
   {
     int i;
     int j;
+
+    //Meshes for additional bodies
+    Mesh body2 = new Mesh();
+    Mesh body3 = new Mesh();
+
+    //Declare faceid (array) to store faces with intersections
+    int[] faceid;
+
+    //copy original body into new bodies
+    body2.CopyFrom(body);
+    body3.CopyFrom(body);
 
     //Create list for intersection points
     List<Point3d> lpt = new List<Point3d>();
@@ -15,6 +26,16 @@ private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, r
     //Create list for sunray intersection lines
     List<Line> lsunray = new List<Line>();
 
+    /*
+    //array to store integers corresponding with body faces
+    int[] facesarray = new int[body.Faces.Count / 3];
+    //populate array
+    for (int k = 0; k < facesarray.Length; k++) {
+      facesarray[k] = k;
+    }
+    body2.Faces.DeleteFaces(facesarray);
+    */
+
     //Loop for sunray intersection test
     for (i = 0; i < wall.Faces.Count; ++i){
       //Make variable for ALL wallpoints on wall (first vertex of each wall face)
@@ -22,10 +43,16 @@ private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, r
       //Line from all wallpoints, in "sunray" vector direction (angled towards sun point)
       Line ln = new Line(wallpoint, sunray);
 
-      //Declare faceid (array)
-      int[] faceid;
+
       //Evaluate intersection points ("xp") between lines from wall and human mesh
       Point3d[] xp = Rhino.Geometry.Intersect.Intersection.MeshLine(body, ln, out faceid);
+
+
+      //delete faces that have an intersect
+      //body.Faces.DeleteFaces(faceid);
+
+      body2.Faces.DeleteFaces(faceid);
+
 
       //Sift for intersected points and lines
       if (xp.Length == 2){    //if the lines go through the mesh twice
@@ -56,6 +83,7 @@ private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, r
 
 
 
+
     //Assign to A
     A = lsunray;  //outputs 13659 lines (should be 165) (*82.781)
     B = lpt;
@@ -63,5 +91,5 @@ private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, r
     C = lpt.Count;    //verified to be 165
     D = wallpointsift.Count;    //verified to be 165
     E = wall.Faces.Count;    //1600
-    
+    F = body2;
   }
