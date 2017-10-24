@@ -1,7 +1,9 @@
-private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, ref object A, ref object B, ref object C, ref object D, ref object E)
+private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, ref object A, ref object B, ref object C, ref object D, ref object E, ref object F)
   {
     int i;
     int j;
+
+    Mesh body2 = new Mesh();
 
     //Create list for intersection points
     List<Point3d> lpt = new List<Point3d>();
@@ -22,10 +24,13 @@ private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, r
       //Line from all wallpoints, in "sunray" vector direction (angled towards sun point)
       Line ln = new Line(wallpoint, sunray);
 
-      //Declare faceid (array)
+      //Declare faceid (array) to store faces with intersections
       int[] faceid;
       //Evaluate intersection points ("xp") between lines from wall and human mesh
       Point3d[] xp = Rhino.Geometry.Intersect.Intersection.MeshLine(body, ln, out faceid);
+
+      //delete faces that have an intersect
+      body.Faces.DeleteFaces(faceid);
 
       //Sift for intersected points and lines
       if (xp.Length == 2){    //if the lines go through the mesh twice
@@ -63,5 +68,5 @@ private void RunScript(Mesh body, Mesh wall, int slider, Point3d sun, int res, r
     C = lpt.Count;    //verified to be 165
     D = wallpointsift.Count;    //verified to be 165
     E = wall.Faces.Count;    //1600
-    
+    F = body;
   }
