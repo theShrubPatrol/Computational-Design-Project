@@ -1,0 +1,68 @@
+  private void RunScript(List<Mesh> lbodymesh, Point3d viewpoint, double transrange, double viewfactor, ref object A, ref object B)
+  {
+    //Make list for centerpoints of meshes
+    List<Point3d> lcentroids = new List<Point3d>();
+    //Make list for offset vectors
+    List<Vector3d> lcentroidvector = new List<Vector3d>();
+
+
+
+    //Create Loop for finding centroid of each triangular mesh
+    for(int i = 0;i < lbodymesh.Count;++i){
+      //Create new Mesh from index
+      Mesh bodymeshface = lbodymesh[i];
+      //Get points from each Vertex
+      Point3d meshvertex1 = bodymeshface.Vertices[0];
+      Point3d meshvertex2 = bodymeshface.Vertices[1];
+      Point3d meshvertex3 = bodymeshface.Vertices[2];
+
+      //Find Centroid
+      Point3d meshcentroid = new Point3d((meshvertex1.X + meshvertex2.X + meshvertex3.X) / 3, (meshvertex1.Y + meshvertex2.Y + meshvertex3.Y) / 3, (meshvertex1.Z + meshvertex2.Z + meshvertex3.Z) / 3);
+      //Add Centroid to List
+      lcentroids.Add(meshcentroid);
+
+
+      //Make offset vector
+      Vector3d offsetvector = new Vector3d((viewpoint - meshcentroid) / 2);
+      //Unitize Vector
+      offsetvector.Unitize();
+
+      //Create random number for offset distance
+      double offsetdist = randomDoubleBetween((0 - transrange), transrange);
+
+      //Create scale factor using view factor
+      double scalefactor = offsetdist * viewfactor + 1;
+
+      //Scale mesh using scalefactor
+      Transform scale = Rhino.Geometry.Transform.Scale(meshcentroid, scalefactor);
+      bodymeshface.Transform(scale);
+
+      //Multiply vector by offset distance
+      offsetvector = offsetvector * offsetdist;
+
+      //Translate mesh along vector using offset distance
+      bodymeshface.Translate(offsetvector);
+
+
+    }
+
+    A = lcentroids;
+    B = lbodymesh;
+
+    //Point3d centerpoint = lbodymesh[1].Vertices[lbodymesh.Faces[1].A];
+
+    //  A = lbodymesh[1].Vertices[A];
+
+    //Find centerpoint of meshes
+    // for(int i =0; i<lbodymesh.face
+
+    //lcenterpts.Add(lbodymesh
+  }
+
+  // <Custom additional code> 
+  //RNG for doubles
+  Random random = new Random();
+  double randomDoubleBetween(double minValue, double maxValue){
+    var next = random.NextDouble();
+    return minValue + (next * (maxValue - minValue));
+  }
